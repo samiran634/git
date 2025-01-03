@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duel Page</title>
+    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body class="body">
+    <div   class="hidden">
+        <div class="spinner overlay">
+            <img src="https://jwt.io/img/pic_logo.svg" alt="Spinner Image" class="spinner-image">
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <h1 class="navbar-title">Quiz App</h1>
+        <div class="navbar-links">
+            <a href="https://quize-app-qan3.onrender.com/logout" id="login-link">Logout</a>
+            <a href="https://quize-app-qan3.onrender.com/dashboard" id="dashboard-link">Dashboard</a>
+            <a href="https://quize-app-qan3.onrender.com/ranktable" id="ranktable-link">Rank Table</a>
+        </div>
+    </nav>
+
+    <div id="navbar-mini-container" class="hidden">
+        <p class="mini-title">Quiz App</p>
+        <span class="material-symbols-outlined" id="menu-open-btn">menu</span>
+    </div>
+    <div class="popupbox ">
+        <input type="text" class="playername input-box" placeholder="please enter your name" >
+        <button class="submitbtn">SUBMIT</button>
+    </div>
+    <div class="prefaceCard hidden">
+        <div class="prefaceCard-title">Duel</div>
+        <div class="prefaceCard-text">Wencome to our specal game play where you can duel with another player.the player may got choosen randomely or you can challenge a specific player by searching their name</div>
+        <div class="feature">
+            <div class="feature-item">
+                <span class="material-symbols-outlined icon">search</span>
+                <button class="feature-text searchbtn">Search for a player</button>
+            </div>
+            <div class="feature-item">
+                <span class="material-symbols-outlined icon">sports_esports</span>
+                <button class="feature-text challengebtn">Challenge a player</button>
+            </div>
+        </div>
+    </div>
+   
+    <div class="searching">searching a available palyer</div>
+    <div id="playersinfo" class="hidden">
+        <div class="player-card-container">
+            <div class="player-card p1-card">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player" class="player-image">
+            </div>
+            <div class="p1status">
+                <span class="p1status-text">Player 1 status</span>
+            </div>
+        </div>
+        <div class="player-card-container">
+            <div class="player-card p2-card">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player" class="player-image">
+            </div>
+            <div class="p2status">
+                <span class="p2status-text">Player 2 status</span>
+            </div>
+        </div>
+    </div>
+ <div class="notification">
+        <script>
+
+        </script>
+ </div>
+
+ 
+    <div class="quizcontainer"></div>
+    <div class="winnerbox"></div>
+    <div class="scorebox"></div>
+    <div class="looserbox"></div>
+    <script type="module" src="./javascript/socket/socket.io/client-dist/socket.io.js"></script>
+    <script type="module">
+        import duel from "./javascript/duel.js";
+        const socket = io('http//localhost:3000');
+        duel(socket);
+    </script>
+</body>
+</html>

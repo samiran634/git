@@ -1,0 +1,211 @@
+/* General Styling */
+body {
+    background-color: #1a202c;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+.hidden {
+    display: none;
+}
+
+.scroll-smooth {
+    scroll-behavior: smooth;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(90deg, #1e3a8a, #2563eb);
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+.navbar-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navbar-links a {
+    margin-left: 16px;
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.navbar-links a:hover {
+    color: #FFD700;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner-image {
+    animation: spin 1s linear infinite;
+    width: 100px;
+    height: 100px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* Features Section */
+.feature {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+}
+
+.icon {
+    font-size: 2rem;
+    color: #2563eb;
+    margin-right: 8px;
+}
+
+.feature-text {
+    font-size: 1.25rem;
+}
+
+/* Player Info */
+.player-card-container {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.player-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    width: 200px;
+}
+
+.player-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Status Box */
+.status-box {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 8px;
+    text-align: center;
+    color: #000;
+}
+
+.status-text {
+    font-size: 1.25rem;
+}
+.popupbox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(55, 50, 133, 0.3);
+    z-index: 9999;
+  }
+  
+  .input-box {
+    width: 80%;
+    padding: 1.22em;
+    margin-bottom: 1.2em;
+    border: 1px solid #ccc;
+    border-radius: .25em;
+    font-size: 1em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+  .submitbtn {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .submitbtn:hover {
+    background-color: #0056b3;
+  }
+  .searching{
+    display: none;
+  }
+  .prefaceCard{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 400px;
+    min-height: 200px;
+    background-color: #fff;
+    padding: 20px;
+    color:black;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .player-card-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.player-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+.p1-card {
+    float: left;
+}
+.p2-card {
+    float: right;
+}
