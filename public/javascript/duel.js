@@ -7,7 +7,7 @@ export default function duel(socket,questionContainerMaker) {
       let questioncontainer=document.querySelector('.questioncontainer');
       let prefacecard=document.querySelector('.prefaceCard');
       let quitbtn=document.querySelector('.quitbtn');
-    let searchbtn=document.querySelector('.searchbtn');
+    let searchbtn=document.querySelector('#searchbtn');
     let p1status=document.querySelector('.p1status');
     let p2status=document.querySelector('.p2status');
     document.querySelector('.submitbtn').addEventListener('click', () => {
@@ -50,4 +50,5 @@ export default function duel(socket,questionContainerMaker) {
       });
     
     }
+
     
