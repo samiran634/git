@@ -3,48 +3,65 @@ export default function duel(socket,questionContainerMaker) {
     document.querySelector(".spinner").style.display = "none";
   });
       let playerName ;
+      let playerList=[];
       let playerinfo=document.querySelector('#playersinfo');
-      let questioncontainer=document.querySelector('.questioncontainer');
+      let questionContainer=document.querySelector('.questioncontainer');
       let prefacecard=document.querySelector('.prefaceCard');
-      let quitbtn=document.querySelector('.quitbtn');
     let searchbtn=document.querySelector('#searchbtn');
     let p1status=document.querySelector('.p1status');
     let p2status=document.querySelector('.p2status');
+    let searching=document.querySelector('.searching');
     document.querySelector('.submitbtn').addEventListener('click', () => {
       playerName = document.querySelector('.playername').value.trim();
-      document.querySelector('.popupbox').style.display='none';
+      if (playerName) {
+      document.querySelector('.popupbox').classList.add('hidden');
       socket.emit('palyerJoined',  playerName);
-      document.querySelector('.popupbox').style.display='none';
-      prefacecard.style.display="flex";
+      prefacecard.classList.remove("hidden");
+      }
+      else {
+        alert('Please enter your name');
+      }
     });
      searchbtn.addEventListener('click', () => {
-      if(playerName)
         socket.emit('playerJoined', {name: playerName});
-      else alert("please enter your name before searching");
-    prefacecard.style.display="none";
-      playerinfo.style.display='flex';
-     socket.on('joinedplayerlist',async (data) => {
+     socket.on('joinedplayerlist',  (data) => {
         console.log('Joined player list:', data);
-        let playerList = data;
-        if(playerList.length>2){
+         playerList = data;
+        if(playerList.length>=2){
+          searching.classList.add("hidden");
             socket.emit('playermatchup', { waitingPlayers: playerList });
-        }else p2status.innerHTML="searching for opponent";
+        }else   searching.classList.remove("hidden");
     
       });
     socket.on("newPlayerWaiting",()=>{
       const notificationDiv = document.querySelector(".notification");
       function showNotification(){
-          notificationDiv.style.display="flex";
+          notificationDiv.classList.add("flex");
           setTimeout(() => {
-              notificationDiv.style.display="none";
+            notificationDiv.classList.remove("flex");
+              notificationDiv.classList.add("hidden");
           }, 3000);
       }
       showNotification();
     })
-      socket.on("startGame", async(data) => {
+    let f=0;
+      socket.on("startGame",  (data) => {
+        searching.classList.add("hidden");
+        console.log("from startgame",data);
+        prefacecard.style.display="none";
         let allPlayers = data.allPlayers;
-        let questionpackege=data.questionpackege;
-        questionContainerMaker(questioncontainer,questionpackege,socket);
+        playerinfo.classList.remove('hidden');
+        // let game=allPlayers.find((ele)=>ele.player1.name===playerName);
+        // if(game){
+        //   p1status.innerHTML=game.find((ele)=>ele.name===playerName);
+        // }
+        let questionPackege=data.questionpackege;
+        questionContainer.classList.remove('hidden');
+        if(f==0){
+          questionContainerMaker(questionContainer,questionPackege,socket);
+          f=1;
+        }
+
         
       })   
       });

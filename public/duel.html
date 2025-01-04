@@ -27,7 +27,8 @@
         <p class="mini-title">Quiz App</p>
         <span class="material-symbols-outlined" id="menu-open-btn">menu</span>
     </div>
-    <div class="popupbox ">
+    <div class="popupbox">
+        <div class="heading">welcome to quiz app</div>
         <input type="text" class="playername input-box" placeholder="please enter your name" >
         <button class="submitbtn">SUBMIT</button>
     </div>
@@ -48,37 +49,40 @@
    
     <div class="searching hidden">searching for an available player</div>
     <div id="playersinfo" class="hidden">
-        <div class="player-card-container">
-            <div class="player-card p1-card">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player" class="player-image">
+        <div class="playerinfo">
+    
+            <div class="player-card-container">
+                <div class="player-card p1-card">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player" class="player-image">
+                </div>
+                <div class="p1status">
+                    <span class="p1status-text">Player 1 status</span>
+                </div>
             </div>
-            <div class="p1status">
-                <span class="p1status-text">Player 1 status</span>
-            </div>
-        </div>
-        <div class="player-card-container">
-            <div class="player-card p2-card">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player" class="player-image">
-            </div>
-            <div class="p2status">
-                <span class="p2status-text">Player 2 status</span>
+            <div class="player-card-container">
+                <div class="player-card p2-card">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player" class="player-image">
+                </div>
+                <div class="p2status">
+                    <span class="p2status-text">Player 2 status</span>
+                </div>
             </div>
         </div>
     </div>
+        
  <div class="notification">
 
  </div>
-
- 
-    <div class="quizcontainer"></div>
-    <div class="winnerbox"></div>
-    <div class="scorebox"></div>
-    <div class="looserbox"></div>
+    <div class="questioncontainer hidden"></div>
+    <div class="winnerbox hidden"></div>
+    <div class="scorebox hidden"></div>
+    <div class="looserbox hidden"></div>
     <script type="module" src="./javascript/socket/socket.io/client-dist/socket.io.js"></script>
     <script type="module">
         import duel from "./javascript/duel.js";
-        const socket = io('http//localhost:3000');
-        duel(socket);
+        import QuestionContainer from "./javascript/QuestionContainer.js";
+        const socket = io();
+        duel(socket,QuestionContainer);
     </script>
     <script>
         window.addEventListener('scroll', function() {

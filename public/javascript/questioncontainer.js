@@ -16,9 +16,11 @@ export default function QuestionContainer(container, containerzes, socket) {
 
     // Create initial UI
     const containerCategory = document.createElement('span');
-    containerCategory.classList.add('container-category');
+    containerCategory.classList.add('container-category','quizeHeadding');
     containerCategory.innerText = containerzes[currentQuestion].category;
-    container.appendChild(containerCategory);
+    const quizeHeadding=document.createElement('div');
+    quizeHeadding.classList.add('quizeHeadding');
+  
 
     const countContainer = document.createElement('div');
     countContainer.classList.add('d-flex', 'justify-space-between');
@@ -27,14 +29,16 @@ export default function QuestionContainer(container, containerzes, socket) {
     qnsCount.classList.add('qns-count');
     countContainer.appendChild(qnsCount);
     let timeBar = document.createElement('div');
-    timeBar.classList.add('timebar');
-    timeBar.style.width = '100%';
+    timeBar.classList.add('timebar','quizeHeadding');
+    timeBar.style.width = '40%';
     timeBar.style.height = '20px';
     timeBar.style.background = 'green';
-    document.body.appendChild(timeBar);
+    quizeHeadding.appendChild(containerCategory);
+    quizeHeadding.appendChild(timeBar);
+    container.appendChild(quizeHeadding);
     let time = 10;
     let timer = setInterval(() => {
-      timeBar.style.width = `${time * 10}%`;
+     
       timeBar.style.background = `linear-gradient(to right, green ${time * 10}%, red ${time * 10}%)`;
       time--;
       if (time === 0) {
@@ -141,7 +145,7 @@ export default function QuestionContainer(container, containerzes, socket) {
                 nextBtn.innerText = "Submit";
             }
         } else if (nextBtn.innerText === "Submit") {
-            finishQuiz();
+            socket.emit("gameOver")
         }
         updateButtonStates();
     });
@@ -149,7 +153,7 @@ export default function QuestionContainer(container, containerzes, socket) {
     // Event listener for the Quit button
     quitBtn.addEventListener("click", () => {
         score = 0;
-        finishQuiz();
+        socket.emit("gameOver");
     });
 
     // Event listener for options selection
@@ -163,11 +167,11 @@ export default function QuestionContainer(container, containerzes, socket) {
 
             if (selectedAnswer === correctAnswer) {
                 e.target.classList.add("success");
-                score += 5;
+                score += 69;
                 scoreContainer.innerText = `Score: ${score}`;
             } else {
                 e.target.classList.add("error");
-                score--;
+                score-=100;
                 // Highlight the correct answer
                 optionsParent.querySelector(`[name="${correctAnswer}"]`).classList.add("success");
             }

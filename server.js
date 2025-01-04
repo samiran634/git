@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
         console.log("Player reconnected:", name);
       } else {
         // Add player to waiting queue
-        waitingPlayers.push({ socketId: socket.id, score: 0 });
+        waitingPlayers.push({ socketId: socket.id,name, score: 0 });
         playerJoined.push({ socketId: socket.id, name });
       }
       // Notify other waiting players if a new player is waiting
@@ -77,13 +77,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("playermatchup", async (data) => {
+    console.log("form matchup:", data);
     waitingPlayers = data.waitingPlayers;
     // Pair players if possible
     if (waitingPlayers.length >= 2) {
       const [player1, player2] = waitingPlayers.splice(0, 2);
       const newGame = {
-        player1: { socketId: player1.socketId, score: player1.score},
-        player2: { socketId: player2.socketId, score: player2.score}
+        player1: { socketId: player1.socketId,name:player1.name, score: player1.score},
+        player2: { socketId: player2.socketId,name:player2.name, score: player2.score}
       };
 
       playerArray.push(newGame);
@@ -164,6 +165,6 @@ io.on("connection", (socket) => {
   });
 
 // Start the server
-server.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
+server.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
