@@ -87,12 +87,13 @@
     <div class="scorebox hidden"></div>
     <div class="looserbox hidden"></div>
 
-    <script type="module" src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script type="module">
-        import duel from "/javascript/duel.js";
-        import QuestionContainer from "/javascript/QuestionContainer.js";
+        import duel from './javascript/duel.js';
+        import QuestionContainer from './javascript/QuestionContainer.js';
+        
         const socket = io();
-        duel(socket,QuestionContainer);
+        duel(socket, QuestionContainer);
     </script>
     <script>
         window.addEventListener('scroll', function() {

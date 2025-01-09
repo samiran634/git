@@ -15,6 +15,14 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 
+// Add proper MIME type for JavaScript modules
+app.use((req, res, next) => {
+    if (req.url.endsWith('.js')) {
+        res.type('application/javascript');
+    }
+    next();
+});
+
 // Serve static files from public directory
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
