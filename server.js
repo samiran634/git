@@ -5,16 +5,19 @@ const path = require("path");
 const cors = require('cors');
 const app = express();
 const server = createServer(app);
-const port=process.env.PORT||3000;
+const port = process.env.PORT || 3000;
+
 // CORS configuration
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://quize-app-qan3.onrender.com'],  // Add your allowed origins
+    origin: ['http://localhost:3000', 'https://quize-app-qan3.onrender.com'],
     methods: ['GET', 'POST'],
     credentials: true,
     optionsSuccessStatus: 200
 };
 
-// Apply CORS middleware
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 
 // Socket.IO CORS configuration
@@ -56,8 +59,7 @@ async function quizdata(noOfQuestion, catagoryind) {
   }
 
 }
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+
 console.log(__dirname);
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "./public/duel.html"));
