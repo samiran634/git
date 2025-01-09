@@ -2,10 +2,30 @@ const express = require("express");
 const { createServer } = require("node:http");
 const { Server } = require("socket.io");
 const path = require("path");
+const cors = require('cors');
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
-const port = process.env.PORT || 3000;
+const port=process.env.PORT||3000;
+// CORS configuration
+const corsOptions = {
+    origin: ['http://localhost:3000', 'https://quize-app-qan3.onrender.com'],  // Add your allowed origins
+    methods: ['GET', 'POST'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Socket.IO CORS configuration
+const io = new Server(server, {
+    cors: {
+        origin: ['http://localhost:3000', 'https://quize-app-qan3.onrender.com'],
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+});
+
 //function to import quize
 async function quizdata(noOfQuestion, catagoryind) {
 
@@ -67,11 +87,7 @@ io.on("connection", (socket) => {
         waitingPlayers.push({ socketId: socket.id,name, score: 0 });
         playerJoined.push({ socketId: socket.id, name });
       }
-      // Notify other waiting players if a new player is waiting
-      if (waitingPlayers.length > 0) {
-        const waitingPlayersIds = waitingPlayers.map((player) => player.socketId);
-        io.to(waitingPlayersIds).emit("newPlayerWaiting", { waitingPlayersCount: waitingPlayers.length });
-      }
+ 
     }
     socket.emit("joinedplayerlist", playerJoined);
   });
@@ -97,7 +113,61 @@ io.on("connection", (socket) => {
       io.to(player2.socketId).emit("startGame", { allPlayers: playerArray, questionpackege: questionpackege });
     }
   });
+  socket.on('challengeAccepted', async (data) => {
+    const challenger = playerJoined.find(player => player.socketId === data.challengerId);
+    const challenged = playerJoined.find(player => player.socketId === socket.id);
+    
+    if (challenger && challenged) {
+      // Create new game
+      const newGame = {
+        player1: { 
+          socketId: challenger.socketId,
+          name: challenger.name, 
+          score: 0
+        },
+        player2: { 
+          socketId: challenged.socketId,
+          name: challenged.name, 
+          score: 0
+        }
+      };
 
+      // Add to active games
+      playerArray.push(newGame);
+
+      // Get questions
+      const questionpackege = await quizdata(10);
+
+      // Notify both players to start the game
+      io.to(challenger.socketId).emit("startGame", { 
+        allPlayers: [newGame], 
+        questionpackege: questionpackege 
+      });
+      
+      io.to(challenged.socketId).emit("startGame", { 
+        allPlayers: [newGame], 
+        questionpackege: questionpackege 
+      });
+
+      // Remove players from waiting list
+      waitingPlayers = waitingPlayers.filter(
+        player => player.socketId !== challenger.socketId && 
+                 player.socketId !== challenged.socketId
+      );
+    }
+  });
+  socket.on("challengeRejected", (data) => {
+    const challenger = playerJoined.find(player => player.socketId === data.challengerId);
+    
+    if (challenger) {
+      // Send rejection message to challenger
+      io.to(challenger.socketId).emit("challengeResponse", {
+        status: "rejected",
+        message: `${data.name} has rejected your challenge`,
+        challengedName: data.name
+      });
+    }
+  });
   // Handle game reset
   socket.on("resetGame", () => {
     // Find the game the player belongs to
@@ -123,20 +193,57 @@ io.on("connection", (socket) => {
   });
 
   socket.on("gameOver", (data) => {
-    let findingPlayer = data.playerName;
+    let { playerName, score, time } = data;
 
     // Find the game where the player is involved
-    let game = playerArray.find((g) => g.player1.socketId === socket.id || (g.player2 && g.player2.socketId === socket.id));
+    let game = playerArray.find((g) => 
+      g.player1.socketId === socket.id || (g.player2 && g.player2.socketId === socket.id)
+    );
 
     if (game) {
-      // Determine the winner based on the player name
-      let winner = game.player1.socketId === socket.id ? game.player1.socketId : game.player2.socketId;
+      // Update scores and times for the players
+      if (game.player1.socketId === socket.id) {
+        game.player1.score = score;
+        game.player1.time = time;
+      } else {
+        game.player2.score = score;
+        game.player2.time = time;
+      }
 
-      // Emit the winner's name to all connected clients
-      io.emit("winner", { winner: winner });
+      // Determine winner based on score and time
+      let winner;
+      if (game.player1.score > game.player2.score) {
+        winner = game.player1;
+      } else if (game.player2.score > game.player1.score) {
+        winner = game.player2;
+      } else {
+        // If scores are tied, compare completion times
+        winner = game.player1.time < game.player2.time ? game.player1 : game.player2;
+      }
+
+      // Emit winner details
+      io.emit("winner", { 
+        winner: winner.socketId,
+        winnerName: winner.name,
+        winnerScore: winner.score,
+        winnerTime: winner.time
+      });
     }
   });
-
+socket.on('challengePlayer', (data) => {
+  let {challenger, challenged} = data;
+  
+  // Find the challenged player's socket ID from playerJoined array
+  const challengedPlayer = playerJoined.find(player => player.name === challenged);
+  
+  if (challengedPlayer) {
+    // Emit notification to the challenged player
+    io.to(challengedPlayer.socketId).emit('newPlayerWaiting', {
+      name: challenger,
+      challengerId: socket.id
+    });
+  }
+});
   // Handle player disconnection
   socket.on("disconnect", () => {
     console.log("Player disconnected:", socket.id);

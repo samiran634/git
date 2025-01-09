@@ -8,10 +8,20 @@ export default function QuestionContainer(container, containerzes, socket) {
         }
         return array;
     }
-
+    let playerName;
+    try {
+        playerName = JSON.parse(localStorage.getItem('playerName'));
+        if (!playerName) {
+            console.warn('Player name not found in localStorage');
+            playerName = 'Anonymous';
+        }
+    } catch (error) {
+        console.error('Error retrieving player name:', error);
+        playerName = 'Anonymous';
+    }
     let currentQuestion = 0;
     let score = 0; // Initialize score
-    let cnt = 1;
+    
     const answeredQuestions = new Set();  // Keep track of answered questions
 
     // Create initial UI
@@ -36,15 +46,13 @@ export default function QuestionContainer(container, containerzes, socket) {
     quizeHeadding.appendChild(containerCategory);
     quizeHeadding.appendChild(timeBar);
     container.appendChild(quizeHeadding);
-    let time = 10;
+    let time = 100;
     let timer = setInterval(() => {
      
       timeBar.style.background = `linear-gradient(to right, green ${time * 10}%, red ${time * 10}%)`;
       time--;
       if (time === 0) {
-        clearInterval(timer);
-        time=10;
-
+        socket.emit("gameOver",{playerName,score,time});
       }
     }, 1000);
     const scoreContainer = document.createElement('span');
@@ -145,16 +153,16 @@ export default function QuestionContainer(container, containerzes, socket) {
                 nextBtn.innerText = "Submit";
             }
         } else if (nextBtn.innerText === "Submit") {
-            socket.emit("gameOver")
+            socket.emit("gameOver",{playerName,score,time});
         }
         updateButtonStates();
     });
 
     // Event listener for the Quit button
     quitBtn.addEventListener("click", () => {
-        score = 0;
-        socket.emit("gameOver");
+        socket.emit("gameOver",{playerName,score,time});
     });
+
 
     // Event listener for options selection
     optionsParent.addEventListener("click", (e) => {

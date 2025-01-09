@@ -43,6 +43,11 @@
             <div class="feature-item">
                 <span class="material-symbols-outlined icon">sports_esports</span>
                 <button class="feature-text btn" id="challengebtn">Challenge a player</button>
+                <div class="player-dropdown" id="playerDropdown">
+                    <ul class="player-list" id="playerList">
+                        <!-- Player items will be added here dynamically -->
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -70,13 +75,18 @@
         </div>
     </div>
         
- <div class="notification">
-
- </div>
+ <div class="notification-container">
+    <div class="notification">
+        <div class="notification-content">
+            <!-- Content will be added dynamically -->
+        </div>
+    </div>
+</div>
     <div class="questioncontainer hidden"></div>
     <div class="winnerbox hidden"></div>
     <div class="scorebox hidden"></div>
     <div class="looserbox hidden"></div>
+
     <script type="module" src="./javascript/socket/socket.io/client-dist/socket.io.js"></script>
     <script type="module">
         import duel from "./javascript/duel.js";
