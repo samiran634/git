@@ -16,7 +16,7 @@ const corsOptions = {
 };
 
 // Serve static files from public directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 
@@ -62,8 +62,14 @@ async function quizdata(noOfQuestion, catagoryind) {
 
 console.log(__dirname);
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "./public/duel.html"));
+  res.sendFile(path.join(__dirname, "public", "duel.html"));
 });
+
+// Add a catch-all route for other paths
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "duel.html"));
+});
+
 // Game state management
 let waitingPlayers = []; // Waiting players queue
 let playerArray = [];    // Active games

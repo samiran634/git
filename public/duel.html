@@ -87,10 +87,10 @@
     <div class="scorebox hidden"></div>
     <div class="looserbox hidden"></div>
 
-    <script type="module" src="./javascript/socket/socket.io/client-dist/socket.io.js"></script>
+    <script type="module" src="/socket.io/socket.io.js"></script>
     <script type="module">
-        import duel from "./javascript/duel.js";
-        import QuestionContainer from "./javascript/QuestionContainer.js";
+        import duel from "/javascript/duel.js";
+        import QuestionContainer from "/javascript/QuestionContainer.js";
         const socket = io();
         duel(socket,QuestionContainer);
     </script>
