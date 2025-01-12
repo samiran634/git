@@ -1,8 +1,10 @@
+import axios from "axios";
+
 export default function duel(socket,questionContainerMaker) {
   window.addEventListener("load", () => {
     document.querySelector(".spinner").style.display = "none";
   });
-      let playerName ;
+ 
       let playerList=[];
       let playerinfo=document.querySelector('#playersinfo');
       let questionContainer=document.querySelector('.questioncontainer');
@@ -25,18 +27,21 @@ export default function duel(socket,questionContainerMaker) {
         `;
     }
 
-    document.querySelector('.submitbtn').addEventListener('click', () => {
-      playerName = document.querySelector('.playername').value.trim()||localStorage.getItem("playerName",playerName);
+   
+     let playerName =  axios.get("https://quize-app-qan3.onrender.com/profile").then((response) => {
+        return response.data.name;
+      }).catch((error) => {
+        console.error(error);
+        return  null
+      });
+
   
       if (playerName) {
-      document.querySelector('.popupbox').classList.add('hidden');
       socket.emit('playerJoined', {name: playerName});
       prefacecard.classList.remove("hidden");
-      }
-      else {
-        alert('Please enter your name');
-      }
-    });
+      }else alert("something went wrong");
+ 
+  
     socket.on('joinedplayerlist',  (data) => {
       console.log('Joined player list:', data);
        playerList = data;
@@ -153,6 +158,7 @@ export default function duel(socket,questionContainerMaker) {
             notificationDiv.classList.remove("show");
         }, 3000);
         socket.on("startGame",  (data) => {
+          let f=0;
           searching.classList.add("hidden");
           console.log("from startgame",data);
           prefacecard.style.display="none";
@@ -166,7 +172,7 @@ export default function duel(socket,questionContainerMaker) {
           let questionPackege=data.questionpackege;
           questionContainer.classList.remove('hidden');
           if(f==0){
-            questionContainerMaker(questionContainer,questionPackege,socket);
+            questionContainerMaker(questionContainer,questionPackege,socket,playerName);
             f=1;
           }        
         }) 

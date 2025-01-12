@@ -1,4 +1,4 @@
-export default function QuestionContainer(container, containerzes, socket) {
+export default function QuestionContainer(container, containerzes, socket,playerName) {
     // Fisher-Yates shuffle function
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -7,17 +7,6 @@ export default function QuestionContainer(container, containerzes, socket) {
             [array[i], array[j]] = [array[j], array[i]];
         }
         return array;
-    }
-    let playerName;
-    try {
-        playerName = JSON.parse(localStorage.getItem('playerName'));
-        if (!playerName) {
-            console.warn('Player name not found in localStorage');
-            playerName = 'Anonymous';
-        }
-    } catch (error) {
-        console.error('Error retrieving player name:', error);
-        playerName = 'Anonymous';
     }
     let currentQuestion = 0;
     let score = 0; // Initialize score

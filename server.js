@@ -6,6 +6,10 @@ const cors = require('cors');
 const app = express();
 const server = createServer(app);
 const port = process.env.PORT || 3000;
+const passport=require('./config/passport');
+const cookieparser=require('cookie-parser');
+const profileRoutes = require('./routes/profile.cjs');
+
 
 // CORS configuration
 const corsOptions = {
@@ -27,16 +31,26 @@ app.use((req, res, next) => {
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
+app.use(cookieparser());
+app.use(passport.initialize());
+app.use('/api', profileRoutes);
+//app.use(passport.session());
 
 // Socket.IO CORS configuration
 const io = new Server(server, {
     cors: {
-        origin: ['http://localhost:3000', 'https://quize-app-qan3.onrender.com'],
+        origin: ['https://git-3wi2.onrender.com/', 'https://quize-app-qan3.onrender.com'],
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
-
+app.get('/profile',  passport.authenticate('cookie', { session: false }),
+(req, res) => {
+  const data=res.json({ profile: req.user });
+  console.log(data);
+  return data;
+} 
+);
 //function to import quize
 async function quizdata(noOfQuestion, catagoryind) {
 
@@ -72,7 +86,9 @@ console.log(__dirname);
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "duel.html"));
 });
-
+app("/profile",(req,res)=>{
+  
+})
 // Add a catch-all route for other paths
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "duel.html"));
