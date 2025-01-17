@@ -1,7 +1,6 @@
 const express = require('express');
 const passport = require('passport');
 const axios = require('axios');
-console.log(passport===null);
 const router = express.Router();
 
 // Fetch quiz app profile route
@@ -11,6 +10,7 @@ router.get(
   async (req, res) => {
     try {
       // Use JWT from cookie to call Quiz App API
+      console.log("profile fetching is in progress");
       const token = req.cookies['jwt']; // Adjust the cookie name as needed
       const response = await axios.get('https://quize-app-qan3.onrender.com/api/profile', {
         headers: {

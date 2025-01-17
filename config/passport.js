@@ -1,6 +1,6 @@
 const passport = require('../node_modules/passport');
-const CookieStrategy = require('../node_modules/passport-cookie');
-const jwt = require('../node_modules/jsonwebtoken');
+const CookieStrategy = require('passport-cookie');
+const jwt = require('jsonwebtoken');
 
 // Secret for JWT verification
 const JWT_SECRET = 'sam_chalk';

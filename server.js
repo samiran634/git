@@ -13,7 +13,7 @@ const profileRoutes = require('./routes/profile.cjs');
 
 // CORS configuration
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://quize-app-qan3.onrender.com'],
+    origin: ['https://git-3wi2.onrender.com', 'https://quize-app-qan3.onrender.com'],
     methods: ['GET', 'POST'],
     credentials: true,
     optionsSuccessStatus: 200
@@ -86,12 +86,18 @@ console.log(__dirname);
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "duel.html"));
 });
-app("/profile",(req,res)=>{
-  
-})
-// Add a catch-all route for other paths
+
+app.get("/profile", passport.authenticate('cookie', { session: false }), (req, res) => {
+  res.json({
+    status: "success",
+    message: "Profile data retrieved successfully",
+    data: req.user
+  });
+});
+
+// Catch-all route last
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "duel.html"));
+  res.sendFile(path.join(__dirname, "public", "duel.html"));
 });
 
 // Game state management

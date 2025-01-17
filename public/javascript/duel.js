@@ -1,6 +1,4 @@
-import axios from "axios";
-
-export default function duel(socket,questionContainerMaker) {
+export default async function duel(socket,questionContainerMaker) {
   window.addEventListener("load", () => {
     document.querySelector(".spinner").style.display = "none";
   });
@@ -28,18 +26,34 @@ export default function duel(socket,questionContainerMaker) {
     }
 
    
-     let playerName =  axios.get("https://quize-app-qan3.onrender.com/profile").then((response) => {
-        return response.data.name;
-      }).catch((error) => {
-        console.error(error);
-        return  null
-      });
+     let playerName = await axios.get("https://quize-app-qan3.onrender.com/profile", {
+        withCredentials: true,
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then((response) => {
+        console.log("Profile response:", response.data);
+        if (response.data && response.data.profile) {
+            return response.data.profile.name;
+        }
+        throw new Error('Profile data not found');
+    })
+    .catch((error) => {
+        console.error("Profile fetch error:", error);
+        window.location.href = 'https://quize-app-qan3.onrender.com/login';
+        return null;
+    });
 
   
       if (playerName) {
       socket.emit('playerJoined', {name: playerName});
       prefacecard.classList.remove("hidden");
-      }else alert("something went wrong");
+      }else {
+        alert("Please login to continue");
+        window.location.href = 'https://quize-app-qan3.onrender.com/login';
+      }
  
   
     socket.on('joinedplayerlist',  (data) => {

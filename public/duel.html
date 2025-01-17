@@ -83,13 +83,16 @@
     <div class="scorebox hidden"></div>
     <div class="looserbox hidden"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="module">
         import duel from './javascript/duel.js';
         import QuestionContainer from './javascript/questioncontainer.js';
         
         const socket = io();
-        duel(socket, QuestionContainer);
+        (async () => {
+            await duel(socket, QuestionContainer);
+        })();
     </script>
     <script>
         window.addEventListener('scroll', function() {
