@@ -7,7 +7,7 @@ export default async function duel(socket,questionContainerMaker) {
   if (token) {
       document.cookie = `token=${token}; path=/; secure; samesite=strict`;
   }
-
+alert("it's your tocken",token);
   window.addEventListener("load", () => {
     document.querySelector(".spinner").style.display = "none";
   });
