@@ -13,12 +13,12 @@ const profileRoutes = require('./routes/profile.cjs');
 
 // CORS configuration
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://git-3wi2.onrender.com', 'https://quize-app-qan3.onrender.com'],
+    origin: true,  // Allow all origins
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true,
     optionsSuccessStatus: 200,
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    exposedHeaders: ['Set-Cookie'],
+    exposedHeaders: ['Set-Cookie']
 };
 
 // Add proper MIME type for JavaScript modules
@@ -38,22 +38,25 @@ app.use(passport.initialize());
 app.use('/', profileRoutes);
 //app.use(passport.session());
 
-// Add CORS headers middleware
+// Update CORS headers middleware
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    const origin = req.headers.origin;
+    res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
+    
+    // Handle preflight requests
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
     next();
 });
 
-// Socket.IO CORS configuration
+// Update Socket.IO CORS config
 const io = new Server(server, {
     cors: {
-        origin: ['http://localhost:3000', 'https://git-3wi2.onrender.com', 'https://quize-app-qan3.onrender.com'],
+        origin: true,  // Allow all origins
         methods: ['GET', 'POST'],
         credentials: true,
         allowedHeaders: ['Cookie']

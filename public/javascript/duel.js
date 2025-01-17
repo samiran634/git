@@ -35,25 +35,33 @@ export default async function duel(socket,questionContainerMaker) {
     }
 
    
-     let playerName = await axios.get("https://quize-app-qan3.onrender.com/profile", {
-        withCredentials: true,
+     let playerName = await fetch("https://quize-app-qan3.onrender.com/profile", {
+        method: 'GET',
+        credentials: 'include',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-        }
+            'Cache-Control': 'no-cache',
+            'Origin': window.location.origin
+        },
+        mode: 'cors'  // Explicitly set CORS mode
     })
-    .then((response) => {
-        console.log("Profile response:", response.data);
-        if (response.data && response.data.profile) {
-            return response.data.profile.name || response.data.profile.username;
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Profile fetch failed: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Profile response:", data);
+        if (data && data.profile) {
+            return data.profile.name || data.profile.username;
         }
         window.location.href = 'https://quize-app-qan3.onrender.com/login';
         return null;
     })
-    .catch((error) => {
+    .catch(error => {
         console.error("Profile fetch error:", error);
-        alert(error,"sompthing not good")
         window.location.href = 'https://quize-app-qan3.onrender.com/login';
         return null;
     });
@@ -64,7 +72,7 @@ export default async function duel(socket,questionContainerMaker) {
       prefacecard.classList.remove("hidden");
       }else {
         alert("Please login to continue");
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
+        //window.location.href = 'https://quize-app-qan3.onrender.com/login';
       }
  
   
