@@ -1,13 +1,59 @@
 export default async function duel(socket,questionContainerMaker) {
   // Get JWT token from URL query params
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('token');
-
-  // If token exists in URL, store it as cookie
-  if (token) {
-      document.cookie = `token=${token}; path=/; secure; samesite=strict`;
+  const fullUrl = window.location.href;
+  let token;
+  
+  // Extract token from URL after "?token="
+  if (fullUrl.includes('?token=')) {
+      token = fullUrl.split('?token=')[1];
+      // Remove any additional query params if present
+      token = token.split('&')[0];
+      console.log("Extracted token:", token);
   }
-alert("it's your tocken",token);
+
+  // If token exists, store it as cookie with proper attributes
+  if (token) {
+      // Set cookie with domain and path
+      document.cookie = `token=${token}; path=/; secure; samesite=strict; max-age=3600`;
+      console.log("Cookie set:", document.cookie);
+  } else {
+      console.error("No token found in URL");
+      window.location.href = 'https://quize-app-qan3.onrender.com/login';
+      return;
+  }
+
+  // Get player name with token
+  let playerName = await fetch("https://quize-app-qan3.onrender.com/profile", {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
+          'Origin': window.location.origin
+      },
+      mode: 'cors'
+  })
+  .then(response => {
+      if (!response.ok) {
+          throw new Error('Profile fetch failed: ' + response.status);
+      }
+      return response.json();
+  })
+  .then(data => {
+      console.log("Profile response:", data);
+      if (data && data.profile) {
+          return data.profile.name || data.profile.username;
+      }
+      throw new Error('No profile data');
+  })
+  .catch(error => {
+      console.error("Profile fetch error:", error);
+      window.location.href = 'https://quize-app-qan3.onrender.com/login';
+      return null;
+  });
+
   window.addEventListener("load", () => {
     document.querySelector(".spinner").style.display = "none";
   });
@@ -33,38 +79,6 @@ alert("it's your tocken",token);
             </li>
         `;
     }
-
-   
-     let playerName = await fetch("https://quize-app-qan3.onrender.com/profile", {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-            'Origin': window.location.origin
-        },
-        mode: 'cors'  // Explicitly set CORS mode
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Profile fetch failed: ' + response.status);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Profile response:", data);
-        if (data && data.profile) {
-            return data.profile.name || data.profile.username;
-        }
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
-        return null;
-    })
-    .catch(error => {
-        console.error("Profile fetch error:", error);
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
-        return null;
-    });
 
   
       if (playerName) {
