@@ -64,6 +64,13 @@ app.get('/profile', passport.authenticate('cookie', { session: false }), (req, r
         console.log('User from request:', req.user);
         console.log('Cookies:', req.cookies);
         
+        // Get token from cookie
+        const token = req.cookies.token;
+        
+        if (!token) {
+            return res.status(401).json({ error: 'No token provided' });
+        }
+
         if (!req.user) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
