@@ -12,7 +12,7 @@ router.get(
       // Use JWT from cookie to call Quiz App API
       console.log("profile fetching is in progress");
       const token = req.cookies['jwt']; // Adjust the cookie name as needed
-      const response = await axios.get('https://quize-app-qan3.onrender.com/api/profile', {
+      const response = await axios.get('https://quize-app-qan3.onrender.com/profile', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

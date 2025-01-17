@@ -36,12 +36,12 @@ export default async function duel(socket,questionContainerMaker) {
     .then((response) => {
         console.log("Profile response:", response.data);
         if (response.data && response.data.profile) {
-            return response.data.profile.name;
+            return response.data.profile.name || response.data.profile.username;
         }
         throw new Error('Profile data not found');
     })
     .catch((error) => {
-        console.error("Profile fetch error:", error);
+        console.error("Profile fetch error:", error.response || error);
         window.location.href = 'https://quize-app-qan3.onrender.com/login';
         return null;
     });

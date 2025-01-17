@@ -1,4 +1,4 @@
-const passport = require('../node_modules/passport');
+const passport = require('passport');
 const CookieStrategy = require('passport-cookie');
 const jwt = require('jsonwebtoken');
 
@@ -7,12 +7,17 @@ const JWT_SECRET = 'sam_chalk';
 
 // Define Cookie Strategy
 passport.use(
-  new CookieStrategy((token, done) => {
+  new CookieStrategy({
+    cookieName: 'token'
+  }, (token, done) => {
     try {
-      // Verify JWT from the cookie
+      if (!token) {
+        return done(null, false);
+      }
       const user = jwt.verify(token, JWT_SECRET);
-      return done(null, user); // Attach user to request
+      return done(null, user);
     } catch (err) {
+      console.error('JWT Verification failed:', err);
       return done(null, false);
     }
   })

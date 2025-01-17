@@ -16,7 +16,9 @@ const corsOptions = {
     origin: ['https://git-3wi2.onrender.com', 'https://quize-app-qan3.onrender.com'],
     methods: ['GET', 'POST'],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Set-Cookie'],
 };
 
 // Add proper MIME type for JavaScript modules
@@ -36,6 +38,12 @@ app.use(passport.initialize());
 app.use('/api', profileRoutes);
 //app.use(passport.session());
 
+// Add this after cors middleware
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
+
 // Socket.IO CORS configuration
 const io = new Server(server, {
     cors: {
@@ -44,13 +52,20 @@ const io = new Server(server, {
         credentials: true
     }
 });
-app.get('/profile',  passport.authenticate('cookie', { session: false }),
-(req, res) => {
-  const data=res.json({ profile: req.user });
-  console.log(data);
-  return data;
-} 
-);
+app.get('/profile', passport.authenticate('cookie', { session: false }), (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        res.json({ 
+            status: "success",
+            profile: req.user 
+        });
+    } catch (error) {
+        console.error('Profile route error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 //function to import quize
 async function quizdata(noOfQuestion, catagoryind) {
 
