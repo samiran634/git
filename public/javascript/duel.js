@@ -8,7 +8,7 @@ export default async function duel(socket,questionContainerMaker) {
       token = fullUrl.split('?token=')[1];
       // Remove any additional query params if present
       token = token.split('&')[0];
-      console.log("Extracted token:", token);
+      alert("Extracted token:", token);
   }
 
   // If token exists, store it as cookie with proper attributes
