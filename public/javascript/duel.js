@@ -26,11 +26,12 @@ export default async function duel(socket,questionContainerMaker) {
     }
 
    
-     let playerName = await axios.get("https://quize-app-qan3.onrender.com/profile", {
+     let playerName = await axios.get("/profile", {
         withCredentials: true,
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
         }
     })
     .then((response) => {
@@ -38,11 +39,12 @@ export default async function duel(socket,questionContainerMaker) {
         if (response.data && response.data.profile) {
             return response.data.profile.name || response.data.profile.username;
         }
-        throw new Error('Profile data not found');
+        //window.location.href = 'https://quize-app-qan3.onrender.com/login';
+        return null;
     })
     .catch((error) => {
-        console.error("Profile fetch error:", error.response || error);
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
+        console.error("Profile fetch error:", error);
+        //window.location.href = 'https://quize-app-qan3.onrender.com/login';
         return null;
     });
 
@@ -52,7 +54,7 @@ export default async function duel(socket,questionContainerMaker) {
       prefacecard.classList.remove("hidden");
       }else {
         alert("Please login to continue");
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
+       // window.location.href = 'https://quize-app-qan3.onrender.com/login';
       }
  
   

@@ -13,11 +13,11 @@ const profileRoutes = require('./routes/profile.cjs');
 
 // CORS configuration
 const corsOptions = {
-    origin: ['https://git-3wi2.onrender.com', 'https://quize-app-qan3.onrender.com'],
-    methods: ['GET', 'POST'],
+    origin: ['http://localhost:3000', 'https://git-3wi2.onrender.com', 'https://quize-app-qan3.onrender.com'],
+    methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true,
     optionsSuccessStatus: 200,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     exposedHeaders: ['Set-Cookie'],
 };
 
@@ -35,28 +35,39 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(cookieparser());
 app.use(passport.initialize());
-app.use('/api', profileRoutes);
+app.use('/', profileRoutes);
 //app.use(passport.session());
 
-// Add this after cors middleware
+// Add CORS headers middleware
 app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
     next();
 });
 
 // Socket.IO CORS configuration
 const io = new Server(server, {
     cors: {
-        origin: ['https://git-3wi2.onrender.com/', 'https://quize-app-qan3.onrender.com'],
+        origin: ['http://localhost:3000', 'https://git-3wi2.onrender.com', 'https://quize-app-qan3.onrender.com'],
         methods: ['GET', 'POST'],
-        credentials: true
+        credentials: true,
+        allowedHeaders: ['Cookie']
     }
 });
 app.get('/profile', passport.authenticate('cookie', { session: false }), (req, res) => {
     try {
+        console.log('User from request:', req.user);
+        console.log('Cookies:', req.cookies);
+        
         if (!req.user) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
+        
         res.json({ 
             status: "success",
             profile: req.user 
@@ -100,14 +111,6 @@ async function quizdata(noOfQuestion, catagoryind) {
 console.log(__dirname);
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "duel.html"));
-});
-
-app.get("/profile", passport.authenticate('cookie', { session: false }), (req, res) => {
-  res.json({
-    status: "success",
-    message: "Profile data retrieved successfully",
-    data: req.user
-  });
 });
 
 // Catch-all route last

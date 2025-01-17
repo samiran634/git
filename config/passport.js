@@ -8,16 +8,22 @@ const JWT_SECRET = 'sam_chalk';
 // Define Cookie Strategy
 passport.use(
   new CookieStrategy({
-    cookieName: 'token'
-  }, (token, done) => {
+    cookieName: 'token',
+    signed: false,
+    passReqToCallback: true
+  }, async (req, token, done) => {
     try {
       if (!token) {
+        console.log('No token found');
         return done(null, false);
       }
-      const user = jwt.verify(token, JWT_SECRET);
-      return done(null, user);
+      
+      const decoded = jwt.verify(token, JWT_SECRET);
+      console.log('Decoded token:', decoded);
+      
+      return done(null, decoded);
     } catch (err) {
-      console.error('JWT Verification failed:', err);
+      console.error('Token verification failed:', err);
       return done(null, false);
     }
   })
