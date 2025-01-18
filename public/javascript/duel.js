@@ -15,10 +15,10 @@ export default async function duel(socket,questionContainerMaker) {
   
     // If token exists, store it as cookie with proper attributes
     if (token) {
-        // Set cookie with domain and path
         document.cookie = `token=${token}; path=/; secure; samesite=strict; max-age=3600`;
         console.log("Cookie set:", document.cookie);
     } else {
+        alert("No authentication token found. Redirecting to login...");
         console.error("No token found in URL");
         window.location.href = 'https://quize-app-qan3.onrender.com/login';
         return;
@@ -40,7 +40,7 @@ export default async function duel(socket,questionContainerMaker) {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Profile fetch failed: ' + response.status);
+                throw new Error(`Profile fetch failed: ${response.status}`);
             }
             return response.json();
         });
@@ -48,8 +48,12 @@ export default async function duel(socket,questionContainerMaker) {
         // Initialize game with player name
         if (playerName) {
             initializeGame(socket, playerName, questionContainerMaker);
+        } else {
+            alert("Could not get player profile. Please login again.");
+            window.location.href = 'https://quize-app-qan3.onrender.com/login';
         }
     } catch (error) {
+        alert(`Authentication error: ${error.message}. Redirecting to login...`);
         console.error("Profile fetch error:", error);
         window.location.href = 'https://quize-app-qan3.onrender.com/login';
     }
@@ -84,8 +88,8 @@ function initializeGame(socket, playerName, questionContainerMaker) {
         socket.emit('playerJoined', {name: playerName});
         prefacecard.classList.remove("hidden");
     } else {
-        alert("Please login to continue");
-        //window.location.href = 'https://quize-app-qan3.onrender.com/login';
+        alert("Player authentication failed. Please login to continue.");
+        window.location.href = 'https://quize-app-qan3.onrender.com/login';
     }
 
     socket.on('joinedplayerlist',  (data) => {
