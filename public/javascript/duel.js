@@ -244,6 +244,7 @@ function initializeGame(socket, playerName, questionContainerMaker) {
             }
         });
     });
+    initializeGame(socket,playerName,questionContainer);
 }
 
 
