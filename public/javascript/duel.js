@@ -30,13 +30,11 @@ export default async function duel(socket,questionContainerMaker) {
             method: 'GET',
             credentials: 'include',
             headers: {
-                'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
-                'Cache-Control': 'no-cache',
-                'Origin': window.location.origin
+                'token':token
             },
-            mode: 'cors'
+            credentials:"include"
         })
         .then(response => {
             if (!response.ok) {
@@ -247,6 +245,7 @@ function initializeGame(socket, playerName, questionContainerMaker) {
         });
     });
 }
+
 
 
 
