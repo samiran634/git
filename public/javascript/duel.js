@@ -1,26 +1,30 @@
 export default async function duel(socket,questionContainerMaker) {
   // Get JWT token from URL query params
-  const fullUrl = window.location.href;
-  let token;
+  window.addEventListener('load',async()=>{
+    document.querySelector(".spinner").style.display="none";
+    const fullUrl = window.location.href;
+    let token;
+    alert(fullUrl);
+    // Extract token from URL after "?token="
+    if (fullUrl.includes('?token=')) {
+        token = fullUrl.split('?token=')[1];
+        // Remove any additional query params if present
+        token = token.split('&')[0];
+        alert("Extracted token:", token);
+    }
   
-  // Extract token from URL after "?token="
-  if (fullUrl.includes('?token=')) {
-      token = fullUrl.split('?token=')[1];
-      // Remove any additional query params if present
-      token = token.split('&')[0];
-      alert("Extracted token:", token);
-  }
-
-  // If token exists, store it as cookie with proper attributes
-  if (token) {
-      // Set cookie with domain and path
-      document.cookie = `token=${token}; path=/; secure; samesite=strict; max-age=3600`;
-      console.log("Cookie set:", document.cookie);
-  } else {
-      console.error("No token found in URL");
-      window.location.href = 'https://quize-app-qan3.onrender.com/login';
-      return;
-  }
+    // If token exists, store it as cookie with proper attributes
+    if (token) {
+        // Set cookie with domain and path
+        document.cookie = `token=${token}; path=/; secure; samesite=strict; max-age=3600`;
+        console.log("Cookie set:", document.cookie);
+    } else {
+        console.error("No token found in URL");
+        window.location.href = 'https://quize-app-qan3.onrender.com/login';
+        return;
+    }
+  })
+ 
 
   // Get player name with token
   let playerName = await fetch("https://quize-app-qan3.onrender.com/profile", {
