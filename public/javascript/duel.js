@@ -3,62 +3,23 @@ export default async function duel(socket,questionContainerMaker) {
   window.addEventListener('load', async () => {
     document.querySelector(".spinner").style.display = "none";
     const fullUrl = window.location.href;
-    let token;
     
-    // Extract token from URL after "?token="
-    if (fullUrl.includes('?token=')) {
-        token = fullUrl.split('?token=')[1];
-        // Remove any additional query params if present
-        token = token.split('&')[0];
-        alert(`Token: ${token}`);
-    }
-  
-    // If token exists, store it as cookie with proper attributes
-    if (token) {
-        document.cookie = `token=${token}; path=/; secure; samesite=strict; max-age=3600`;
-        console.log("Cookie set:", document.cookie);
-    } else {
-        alert("No authentication token found. Redirecting to login...");
-        console.error("No token found in URL");
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
-        return;
-    }
-
-    // Move the profile fetch inside the load event handler
-    try {
-        let playerName = await fetch("https://quize-app-qan3.onrender.com/profile", {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-                'token':token
-            },
-            credentials:"include"
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Profile fetch failed: ${response.status}`);
-            }
-            return response.json();
-        });
-
-        // Initialize game with player name
-        if (playerName) {
+   let quarypram=new URLSearchParams(fullUrl.split('?')[1]);
+   const token=quarypram.get('token');
+    const playerName=quarypram.get('name')
+            
+      
+        if (playerName&&token) {
             initializeGame(socket, playerName, questionContainerMaker);
         } else {
             alert("Could not get player profile. Please login again.");
             window.location.href = 'https://quize-app-qan3.onrender.com/login';
         }
-    } catch (error) {
-        alert(`Authentication error: ${error.message}. Redirecting to login...`);
-        console.error("Profile fetch error:", error);
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
-    }
-  });
+    })
+    
 }
 
-// Separate function to initialize game components
+ 
 function initializeGame(socket, playerName, questionContainerMaker) {
     let playerList = [];
     let playerinfo = document.querySelector('#playersinfo');
@@ -244,7 +205,7 @@ function initializeGame(socket, playerName, questionContainerMaker) {
             }
         });
     });
-    initializeGame(socket,playerName,questionContainer);
+  
 }
 
 
