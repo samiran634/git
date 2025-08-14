@@ -5,21 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Duel Page</title>
     <link rel="stylesheet" href="./src/style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 </head>
 <body class="body">
-    <div   class="hidden">
-        <div class="spinner overlay">
-            <img src="https://jwt.io/img/pic_logo.svg" alt="Spinner Image" class="spinner-image">
-        </div>
+    <div class="spinner overlay hidden">
+        <img src="https://jwt.io/img/pic_logo.svg" alt="Spinner Image" class="spinner-image">
     </div>
 
     <nav class="navbar">
         <h1 class="navbar-title">Quiz App</h1>
         <div class="navbar-links">
-            <a href="https://quize-app-qan3.onrender.com/logout" id="login-link">Logout</a>
-            <a href="https://quize-app-qan3.onrender.com/dashboard" id="dashboard-link">Dashboard</a>
-            <a href="https://quize-app-qan3.onrender.com/ranktable" id="ranktable-link">Rank Table</a>
+            <a href="/logout">Logout</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/ranktable">Rank Table</a>
         </div>
     </nav>
 
@@ -28,30 +26,34 @@
         <span class="material-symbols-outlined" id="menu-open-btn">menu</span>
     </div>
  
+    <!-- Preface Card -->
     <div class="prefaceCard hidden">
         <div class="prefaceCard-title">Duel</div>
-        <div class="prefaceCard-text">Wencome to our specal game play where you can duel with another player.the player may got choosen randomely or you can challenge a specific player by searching their name</div>
+        <div class="prefaceCard-text">
+            Welcome to our special game mode where you can duel another player.
+            You can match randomly or challenge a specific player by searching their name.
+        </div>
         <div class="feature">
             <div class="feature-item">
                 <span class="material-symbols-outlined icon">search</span>
-                <button class="feature-text btn" id='searchbtn'>Search for a player</button>
+                <button class="feature-text btn" id="searchbtn">Search for a player</button>
             </div>
             <div class="feature-item">
                 <span class="material-symbols-outlined icon">sports_esports</span>
                 <button class="feature-text btn" id="challengebtn">Challenge a player</button>
                 <div class="player-dropdown" id="playerDropdown">
-                    <ul class="player-list" id="playerList">
-                        <!-- Player items will be added here dynamically -->
-                    </ul>
+                    <ul class="player-list" id="playerList"></ul>
                 </div>
             </div>
         </div>
     </div>
    
-    <div class="searching hidden">searching for an available player</div>
+    <!-- Searching State -->
+    <div class="searching hidden">Searching for an available player...</div>
+
+    <!-- Player Info -->
     <div id="playersinfo" class="hidden">
         <div class="playerinfo">
-    
             <div class="player-card-container">
                 <div class="player-card p1-card">
                     <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player" class="player-image">
@@ -71,36 +73,32 @@
         </div>
     </div>
         
- <div class="notification-container">
-    <div class="notification">
-        <div class="notification-content">
-            <!-- Content will be added dynamically -->
+    <!-- Notification -->
+    <div class="notification-container">
+        <div class="notification">
+            <div class="notification-content"></div>
         </div>
     </div>
-</div>
+
+    <!-- Game Containers -->
     <div class="questioncontainer hidden"></div>
     <div class="winnerbox hidden"></div>
     <div class="scorebox hidden"></div>
     <div class="looserbox hidden"></div>
-    <button onclick="location.href=`https://quize-app-qan3.onrender.com`" class="home-button">go to home</button>
-    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Home Button -->
+    <button onclick="location.href='/'" class="home-button">Go to Home</button>
+
+    <!-- Liveblocks Scripts -->
     <script type="module">
         import duel from './javascript/duel.js';
-        import QuestionContainer from './javascript/questioncontainer.js';
-        
-        const socket = io();
-        (async () => {
-            await duel(socket, QuestionContainer);
-        })();
+        duel();
     </script>
+
     <script>
         window.addEventListener('scroll', function() {
             const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
         });
     </script>
 </body>

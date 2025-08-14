@@ -1,214 +1,287 @@
-export default async function duel(socket,questionContainerMaker) {
-  // Get JWT token from URL query params
-  window.addEventListener('load', async () => {
-    document.querySelector(".spinner").style.display = "none";
-    const fullUrl = window.location.href;
-    
-   let quarypram=new URLSearchParams(fullUrl.split('?')[1]);
-   const token=quarypram.get('token');
-    const playerName=quarypram.get('name')
-            
-      
-        if (playerName&&token) {
-            initializeGame(socket, playerName, questionContainerMaker);
-        } else {
-            alert("Could not get player profile. Please login again.");
-            window.location.href = 'https://quize-app-qan3.onrender.com/login';
-        }
-    })
-    
+import { createClient } from "https://cdn.jsdelivr.net/npm/@liveblocks/client/+esm";
+
+const client = createClient({
+  publicApiKey: "pk_dev_n-WvOr3WBCIeypgfrI6WHGLlugoZ6WAE2F9BSFm05yOMWA-1JM8MyaQCcLlX8s5K"  
+});
+
+export default function duel() {
+  const params = new URLSearchParams(window.location.search);
+  const playerName = params.get("name");
+  const token = params.get("token");
+
+  if (!playerName || !token) {
+    alert("Missing credentials. Please log in again.");
+    window.location.href = "/login";
+    return;
+  }
+
+  // Enter lobby
+  const { room: lobbyRoom, leave: leaveLobby } = client.enterRoom("lobby", {
+    initialPresence: { name: playerName, status: "waiting" }
+  });
+
+  // Render player list when others change
+  lobbyRoom.subscribe("others", (others) => {
+    renderPlayerList(others, playerName);
+  });
+
+  // Challenge flow
+  document.getElementById("challengebtn").addEventListener("click", () => {
+    showPlayerDropdown(lobbyRoom, playerName);
+  });
+
+  window.addEventListener("beforeunload", () => {
+    leaveLobby();
+  });
 }
 
- 
-function initializeGame(socket, playerName, questionContainerMaker) {
-    let playerList = [];
-    let playerinfo = document.querySelector('#playersinfo');
-    let questionContainer = document.querySelector('.questioncontainer');
-    let prefacecard = document.querySelector('.prefaceCard');
-    let searchbtn = document.querySelector('#searchbtn');
-    let p1status = document.querySelector('.p1status');
-    let p2status = document.querySelector('.p2status');
-    let searching = document.querySelector('.searching');
-    let challengebtn = document.querySelector('#challengebtn');
-    let playerDropdown = document.querySelector('#playerDropdown');
-    let playerListContainer = document.querySelector('#playerList');
-
-    // Function to create player list item
-    function createPlayerListItem(player) {
-        return `
-            <li class="player-list-item" data-player-id="${player.id}">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Player Avatar">
-                <span>${player.name}</span>
-            </li>
-        `;
+function renderPlayerList(others, currentName) {
+  const listContainer = document.getElementById("playerList");
+  listContainer.innerHTML = "";
+  others.forEach((player) => {
+    if (player.presence?.name && player.presence.name !== currentName) {
+      const li = document.createElement("li");
+      li.textContent = player.presence.name;
+      listContainer.appendChild(li);
     }
+  });
+}
 
-    if (playerName) {
-        socket.emit('playerJoined', {name: playerName});
-        prefacecard.classList.remove("hidden");
-    } else {
-        alert("Player authentication failed. Please login to continue.");
-        window.location.href = 'https://quize-app-qan3.onrender.com/login';
-    }
+function showPlayerDropdown(lobbyRoom, currentName) {
+  const dropdown = document.getElementById("playerDropdown");
+  dropdown.classList.toggle("show");
 
-    socket.on('joinedplayerlist',  (data) => {
-        console.log('Joined player list:', data);
-        playerList = data;
-    });
+  const listContainer = document.getElementById("playerList");
+  listContainer.innerHTML = "";
 
-    searchbtn.addEventListener('click', () => {
-        if(playerList.length>=2){
-            searching.classList.add("hidden");
-        } else {
-            searching.classList.remove("hidden");
+  const others = lobbyRoom.getOthers();
+  others.forEach((player) => {
+    if (player.presence?.name && player.presence.name !== currentName) {
+      const li = document.createElement("li");
+      li.textContent = player.presence.name;
+      li.addEventListener("click", async () => {
+        try {
+          const res = await fetch("/create-game", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ player1: currentName, player2: player.presence.name })
+          });
+          
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          
+          const { roomId } = await res.json();
+          joinGameRoom(roomId, currentName);
+          dropdown.classList.remove("show");
+        } catch (error) {
+          console.error("Error creating game:", error);
+          alert("Failed to create game. Please try again.");
         }
+      });
+      listContainer.appendChild(li);
+    }
+  });
+}
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!playerDropdown.contains(event.target) && 
-                !challengebtn.contains(event.target)) {
-                playerDropdown.classList.remove('show');
-            }
-        });
-
-        socket.emit('playermatchup', { waitingPlayers: playerList });
-
-        let f = 0;
-        socket.on("startGame",  (data) => {
-            searching.classList.add("hidden");
-            console.log("from startgame",data);
-            prefacecard.style.display="none";
-            let allPlayers = data.allPlayers;
-            console.log(allPlayers)
-            playerinfo.classList.remove('hidden');
-            // let game=allPlayers.find((ele)=>ele.player1.name===playerName);
-            // if(game){
-            //   p1status.innerHTML=game.find((ele)=>ele.name===playerName);
-            // }
-            let questionPackege = data.questionpackege;
-            questionContainer.classList.remove('hidden');
-            if(f==0){
-                questionContainerMaker(questionContainer,questionPackege,socket);
-                f=1;
-            }        
-        });
-
-        socket.on("winner",(data)=>{
-            let {winner,winnername,winnerScore} = data;
-            if(socket.id==winner){
-                alert("congratulation your bank account has been creadited with 1cr ")
-            } else {
-                alert(`why you even born you can't even win a quize.${winnername} has surpassed you`);
-            }
-        });
-    });
-
-    challengebtn.addEventListener("click", () => {
-        // Toggle dropdown visibility with the correct class
-        playerDropdown.classList.toggle('show');
-
-        // Clear existing list
-        playerListContainer.innerHTML = '';
-        
-        // Filter out current player and create list items
-        playerList.forEach(player => {
-            if (player.name !== playerName) {  // Fixed comparison
-                playerListContainer.innerHTML += createPlayerListItem(player);
-            }
-        });
-
-        // Add click handlers to player items
-        document.querySelectorAll('.player-list-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const selectedPlayer = item.querySelector('span').textContent;
-                socket.emit('challengePlayer', {
-                    challenger: playerName,
-                    challenged: selectedPlayer
-                });
-                playerDropdown.classList.remove('show');
-                console.log("notification sent");
-            });
-        });
-
-        socket.on("newPlayerWaiting",(data)=>{
-            const notificationDiv = document.querySelector(".notification");
-            function showNotification(){
-                notificationDiv.classList.add("flex");
-                notificationDiv.innerHTML = `
-                    <div class="notification-content">
-                        <p>Do you want to accept challenge from ${data.name} player?</p>
-                        <div class="notification-buttons">
-                            <button class="notification-btn accept">Yes</button>
-                            <button class="notification-btn reject">No</button>
-                        </div>
-                    </div>
-                `;
-                showNotification();
-                // Add event listeners to buttons
-                const acceptBtn = notificationDiv.querySelector('.accept');
-                const rejectBtn = notificationDiv.querySelector('.reject');
-                
-                acceptBtn.addEventListener('click', () => {
-                    socket.emit('challengeAccepted', data);
-                    notificationDiv.classList.remove("flex");
-                });
-                
-                rejectBtn.addEventListener('click', () => {
-                    socket.emit('challengeRejected', data);
-                    notificationDiv.classList.remove("flex");
-                });
-            }
-            showNotification();
-        });
-    });
-
-    socket.on("challengeResponse", (data) => {
-        const notificationDiv = document.querySelector(".notification");
-        notificationDiv.innerHTML = `
-            <div class="notification-content">
-                <p>${data.message}</p>
-            </div>
-        `;
-        notificationDiv.classList.add("show");
-        
-        // Hide notification after 3 seconds
-        setTimeout(() => {
-            notificationDiv.classList.remove("show");
-        }, 3000);
-
-        socket.on("startGame",  (data) => {
-            let f = 0;
-            searching.classList.add("hidden");
-            console.log("from startgame",data);
-            prefacecard.style.display="none";
-            let allPlayers = data.allPlayers;
-            console.log(allPlayers)
-            playerinfo.classList.remove('hidden');
-            // let game=allPlayers.find((ele)=>ele.player1.name===playerName);
-            // if(game){
-            //   p1status.innerHTML=game.find((ele)=>ele.name===playerName);
-            // }
-            let questionPackege = data.questionpackege;
-            questionContainer.classList.remove('hidden');
-            if(f==0){
-                questionContainerMaker(questionContainer,questionPackege,socket,playerName);
-                f=1;
-            }        
-        });
-
-        socket.on("winner",(data)=>{
-            let {winner,winnername,winnerScore} = data;
-            if(socket.id==winner){
-                alert("congratulation your bank account has been creadited with 1cr ")
-            } else {
-                alert(`why you even born you can't even win a quize.${winnername} has surpassed you`);
-            }
-        });
-    });
+function joinGameRoom(roomId, playerName) {
+  console.log("Joining game room:", roomId);
   
+  // Show spinner while joining
+  document.querySelector(".spinner").classList.remove("hidden");
+  
+  const { room: gameRoom, leave: leaveGame } = client.enterRoom(roomId, {
+    initialPresence: { name: playerName, status: "playing" }
+  });
+
+  // Subscribe to storage changes for real-time updates
+  const unsubscribeStorage = gameRoom.subscribe("storage", (storage) => {
+    console.log("Storage updated:", storage);
+    updateGameUI(storage.root, playerName);
+  });
+
+  // Subscribe to presence changes
+  const unsubscribePresence = gameRoom.subscribe("others", (others) => {
+    console.log("Other players:", others);
+    updatePlayerStatus(others);
+  });
+
+  // Initialize game once storage is available
+  gameRoom.getStorage().then((storage) => {
+    console.log("Storage received:", storage);
+    
+    if (!storage) {
+      console.error("No storage received");
+      alert("Failed to load game data. Please try again.");
+      document.querySelector(".spinner").classList.add("hidden");
+      return;
+    }
+
+    const root = storage.root.toObject();
+    console.log("Storage root object:", root);
+
+    if (root && root.questions && root.players) {
+      console.log("Game data is valid, initializing game...");
+      
+      // Hide spinner and preface card
+      document.querySelector(".spinner").classList.add("hidden");
+      document.querySelector(".prefaceCard").style.display = "none";
+      
+      // Show game elements
+      document.querySelector(".questioncontainer").classList.remove("hidden");
+      document.querySelector("#playersinfo").classList.remove("hidden");
+
+      // Update player info
+      updatePlayerInfo(root.players, playerName);
+
+      // Start the quiz game
+      import("./questioncontainer.js").then(({ default: questionContainerMaker }) => {
+        console.log("Starting question container...");
+        questionContainerMaker(
+          document.querySelector(".questioncontainer"),
+          root.questions,
+          {
+            updateScore: (score) => {
+              updatePlayerScore(gameRoom, playerName, score);
+            },
+            updateTime: (timeRemaining) => {
+              updatePlayerTime(gameRoom, playerName, timeRemaining);
+            },
+            endGame: (finalScore) => {
+              endGame(gameRoom, playerName, finalScore);
+            }
+          },
+          playerName
+        );
+      }).catch((error) => {
+        console.error("Failed to load question container:", error);
+        alert("Failed to load game interface. Please refresh the page.");
+        document.querySelector(".spinner").classList.add("hidden");
+      });
+    } else {
+      console.error("Game room has invalid data structure:", root);
+      console.log("Questions:", root?.questions);
+      console.log("Players:", root?.players);
+      alert("Game data is corrupted. Please try creating a new game.");
+      document.querySelector(".spinner").classList.add("hidden");
+    }
+  }).catch((error) => {
+    console.error("Failed to get storage:", error);
+    alert("Failed to load game. Please try again.");
+    document.querySelector(".spinner").classList.add("hidden");
+  });
+
+  // Add timeout fallback to prevent infinite spinner
+  setTimeout(() => {
+    if (!document.querySelector(".spinner").classList.contains("hidden")) {
+      console.warn("Game loading timeout - hiding spinner");
+      document.querySelector(".spinner").classList.add("hidden");
+      alert("Game is taking too long to load. Please try again.");
+    }
+  }, 10000); // 10 second timeout
+
+  window.addEventListener("beforeunload", () => {
+    unsubscribeStorage();
+    unsubscribePresence();
+    leaveGame();
+  });
 }
 
+// Helper function to update player score in Liveblocks storage
+function updatePlayerScore(gameRoom, playerName, score) {
+  gameRoom.updateStorage((storage) => {
+    const players = storage.get("players");
+    if (players.get("p1").get("name") === playerName) {
+      players.get("p1").set("score", score);
+    } else if (players.get("p2").get("name") === playerName) {
+      players.get("p2").set("score", score);
+    }
+  });
+}
 
+// Helper function to update player time
+function updatePlayerTime(gameRoom, playerName, timeRemaining) {
+  gameRoom.updateStorage((storage) => {
+    const players = storage.get("players");
+    if (players.get("p1").get("name") === playerName) {
+      players.get("p1").set("timeRemaining", timeRemaining);
+    } else if (players.get("p2").get("name") === playerName) {
+      players.get("p2").set("timeRemaining", timeRemaining);
+    }
+  });
+}
 
-
+// Helper function to end the game
+function endGame(gameRoom, playerName, finalScore) {
+  gameRoom.updateStorage((storage) => {
+    const players = storage.get("players");
+    const p1Score = players.get("p1").get("score");
+    const p2Score = players.get("p2").get("score");
     
+    let winner = null;
+    if (p1Score > p2Score) {
+      winner = players.get("p1").get("name");
+    } else if (p2Score > p1Score) {
+      winner = players.get("p2").get("name");
+    } else {
+      winner = "tie";
+    }
+    
+    storage.set("gameStatus", "finished");
+    storage.set("winner", winner);
+  });
+}
+
+// Update game UI based on storage changes
+function updateGameUI(root, currentPlayer) {
+  const players = root.players;
+  if (players) {
+    updatePlayerInfo(players, currentPlayer);
+    
+    // Check if game is finished
+    if (root.gameStatus === "finished") {
+      showGameResult(root.winner, currentPlayer);
+    }
+  }
+}
+
+// Update player information display
+function updatePlayerInfo(players, currentPlayer) {
+  const p1Card = document.querySelector(".p1-card");
+  const p2Card = document.querySelector(".p2-card");
+  const p1Status = document.querySelector(".p1status-text");
+  const p2Status = document.querySelector(".p2status-text");
+
+  if (p1Card && p2Card && p1Status && p2Status) {
+    p1Status.textContent = `${players.p1.name}: ${players.p1.score} points (${players.p1.timeRemaining}s)`;
+    p2Status.textContent = `${players.p2.name}: ${players.p2.score} points (${players.p2.timeRemaining}s)`;
+    
+    // Highlight current player
+    if (players.p1.name === currentPlayer) {
+      p1Card.classList.add("current-player");
+      p2Card.classList.remove("current-player");
+    } else {
+      p2Card.classList.add("current-player");
+      p1Card.classList.remove("current-player");
+    }
+  }
+}
+
+// Update player status based on presence
+function updatePlayerStatus(others) {
+  console.log("Updating player status:", others);
+  // You can add logic here to show if other player is online/offline
+}
+
+// Show game result
+function showGameResult(winner, currentPlayer) {
+  document.querySelector(".questioncontainer").classList.add("hidden");
+  
+  if (winner === currentPlayer) {
+    document.querySelector(".winnerbox").classList.remove("hidden");
+  } else if (winner === "tie") {
+    document.querySelector(".scorebox").classList.remove("hidden");
+  } else {
+    document.querySelector(".looserbox").classList.remove("hidden");
+  }
+}
